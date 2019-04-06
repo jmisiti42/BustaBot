@@ -1,40 +1,27 @@
 const   cors = require('cors'),
         express = require('express'),
-        ws = require('ws'),
         http = require('http'),
-        bodyParser = require('body-parser');
-
-const PORT = 5000;
-const app = express();
-const server = http.createServer(app);
-const io = require('socket.io')(server);
+        bodyParser = require('body-parser'),
+        PORT = 5000,
+        app = express(),
+        server = http.createServer(app),
+        io = require('socket.io')(server);
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.post('/games/create', async (req, res) => {
-	const { hash, cmd } = req.body;
-	const process = findProcess(pid);
-
-	if (!process) {
-		res.send(JSON.stringify({ error: true }));
-	} else {
-		process.stdin.write(`${cmd} && echo "\nDISPLAYNEWLINE"\n`);
-		// process.stdin.write('echo ""\n');
-		res.send(JSON.stringify({ error: false }));
-	}
+app.post('/game/add', async (req, res) => {
+    let { number, crashedAt, payout, wager } = req.body;
+    io.sockets.emit('addGame', [ number, crashedAt, payout, wager ]);
+    //Add game in database
+    return res.json({ status: 'ok' }); 
 });
-
-app.get('/test', (req, res) => {
-    io.sockets.emit('addGame', ['1', '2', '2', '40']);
-   return res.send('ok'); 
-});
-
 
 io.on('connection', client => {
-    client.on('getGames', data => { 
-        client.emit('gameList', [['1', '2', '2', '40' ],['2', '2', '2', '40' ]]);
+    client.on('getGames', pageNumber => {
+        //Get Games from DB and upload them (50 by 50)
+        client.emit('gameList', [['1', '2.34x', '2x', '40 Bits' ],['2', '2.91x', '2x', '40 Bits' ]]);
     });
 
     client.on('disconnect', () => { console.log('disconected') });
