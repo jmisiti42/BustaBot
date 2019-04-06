@@ -1,5 +1,6 @@
-# bustabitDashboard
-To start : 
+# Bustabot Dashboard
+
+To start :
 
 Launch API (cd api && yarn && yarn start)
 
